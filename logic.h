@@ -3,7 +3,7 @@
 
 #define HEIGHT 20         // All boxes are 20px tall
 #define SPEED 10          // 10px/s
-#define BOX_WIDTH 100     // Box is 100px long
+#define BOX_WIDTH 150     // Box is 100px long
 #define X_OFFSET 20       // 20 pixels from side
 #define Y_OFFSET 20       // 20 pixels off bottom
 #define CIRCLE_RADIUS 10 // 10 pixels

@@ -4,9 +4,9 @@
  * @brief Main kernel file. The game is loaded and initialized and control is handed over to breakout.cpp
  * @version 0.1
  * @date 2022-06-22
- * 
+ *
  * @copyright Copyright (c) 2022 Sharan Sajiv Menon
- * 
+ *
  */
 
 #include "kernel.h"
@@ -29,8 +29,8 @@ CKernel::CKernel(void)
 	  m_pKeyboard(0),
 	  m_breakout(&m_graphics,
 				 &m_Screen, &m_DeviceNameService,
-				//  &m_Logger, 
-				 &m_Timer, 
+				 //  &m_Logger,
+				 &m_Timer,
 				 &m_USBHCI, m_pKeyboard,
 				 CMemorySystem::Get()),
 	  m_ShutdownMode(ShutdownNone)
@@ -100,17 +100,27 @@ TShutdownMode CKernel::Run(void)
 {
 	int width = m_graphics.GetWidth() / 2;
 	int height = m_graphics.GetHeight() / 2;
-	char * introText = (char *)"Breakout";
-	char * name = (char *)"Sharan Sajiv menon";
+	char *introText = (char *)"Breakout";
+	char *name = (char *)"Sharan Sajiv menon";
 
-	for (int i = 0; i < 100; i++) {
-			drawString(&m_graphics, width / 2, height / 2, introText, BRIGHT_RED_COLOR, 5);
-			drawString(&m_graphics, width / 2 - 50, height / 2 + 100, name, BRIGHT_RED_COLOR, 3);
-			m_graphics.UpdateDisplay();
-			m_Timer.MsDelay(20);
+	for (int i = 0; i < 100; i++)
+	{
+		drawString(&m_graphics, width / 2, height / 2, introText, BRIGHT_RED_COLOR, 5);
+		drawString(&m_graphics, width / 2 - 50, height / 2 + 100, name, BRIGHT_RED_COLOR, 3);
+		m_graphics.UpdateDisplay();
+		m_Timer.MsDelay(20);
 	}
 	m_graphics.ClearScreen(BLACK_COLOR);
 	m_graphics.UpdateDisplay();
+	char *instructions = (char *)"Press any key to switch paddle direction.";
+	for (int i = 0; i < 100; i++)
+	{
+		m_graphics.ClearScreen(BLACK_COLOR);
+		m_graphics.UpdateDisplay();
+		drawString(&m_graphics, width / 3, height / 2, instructions, BRIGHT_RED_COLOR, 2);
+		m_graphics.UpdateDisplay();
+		m_Timer.MsDelay(20);
+	}
 	m_breakout.Run(0);
 
 	return m_ShutdownMode;

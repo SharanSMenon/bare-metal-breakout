@@ -69,6 +69,32 @@ CBreakOut::~CBreakOut(void)
     m_pKeyboard = 0;
     s_pThis = 0;
 }
+
+/**
+ * @brief Reset the game state.
+ *
+ */
+void CBreakOut::reset()
+{
+    int width = (m_pgraphics->GetWidth() > MAX_WIDTH ? MAX_WIDTH : m_pgraphics->GetWidth()) - X_OFFSET * 2;
+    int height = m_pgraphics->GetHeight();
+    gameOver = false;
+    lives = 3;
+    score = 0;
+    boxPosition = 0;
+    boxDirection = 0;
+    paddleColDirection = -1;
+    direction = -1;
+    velocityX = CIRCLE_SPEED;
+    velocityY = -CIRCLE_SPEED;
+    circleX = width / 2;
+    circleY = height / 2;
+    for (int i = 0; i < BLOCKS_PER_ROW * 5; i++)
+    {
+        blocks[i] = 0;
+    }
+}
+
 /**
  * @brief The screen manager function. This is core 1's job, to draw the screen.
  *
@@ -78,14 +104,16 @@ void CBreakOut::drawBlocks()
     int width = (m_pgraphics->GetWidth() > MAX_WIDTH ? MAX_WIDTH : m_pgraphics->GetWidth()) - X_OFFSET * 2;
     int height = m_pgraphics->GetHeight();
     int blockWidth = width / BLOCKS_PER_ROW;
-    circleY += velocityY;
-    circleX += velocityX;
-    // move block/circle
-    boxPosition = boxPosition + getSpeed(width, boxPosition, &boxDirection); // uncomment this.
     // boxPosition = 250; // development purposes
-    int colors[] = {BRIGHT_RED_COLOR, BRIGHT_GREEN_COLOR, BRIGHT_BLUE_COLOR, BRIGHT_YELLOW_COLOR, BRIGHT_CYAN_COLOR};
+    int colors[] = {BRIGHT_RED_COLOR,
+                    BRIGHT_GREEN_COLOR, BRIGHT_BLUE_COLOR,
+                    BRIGHT_YELLOW_COLOR, BRIGHT_CYAN_COLOR};
     if (!gameOver)
     {
+        circleY += velocityY;
+        circleX += velocityX;
+        // move block/circle
+        boxPosition = boxPosition + getSpeed(width, boxPosition, &boxDirection);
         // Colored blocks at top
         m_pgraphics->ClearScreen(BLACK_COLOR);
 
@@ -93,7 +121,7 @@ void CBreakOut::drawBlocks()
         char scoreC[80];
         char livesStr[80];
         sprintf(livesStr, (char *)"Lives: %d", lives);
-            sprintf(scoreC, (char *)"Score: %d", score);
+        sprintf(scoreC, (char *)"Score: %d", score);
         drawString(m_pgraphics, X_OFFSET, 0, s, WHITE_COLOR, 2);
         drawString(m_pgraphics, X_OFFSET + 200, 0, livesStr, WHITE_COLOR, 2);
         drawString(m_pgraphics, X_OFFSET + 400, 0, scoreC, WHITE_COLOR, 2);
@@ -114,24 +142,37 @@ void CBreakOut::drawBlocks()
                               BOX_WIDTH, HEIGHT, BRIGHT_WHITE_COLOR);
         // update
         m_pgraphics->UpdateDisplay();
+        collisons();
     }
-    if (gameOver) {
+    if (gameOver)
+    {
         m_pgraphics->ClearScreen(BLACK_COLOR);
         char *gameover = (char *)"Game Over!";
+        char *youwin = (char *)"You Win!";
+        char *pressRes = (char *)"Press a key to start again";
         char finalS[80];
         sprintf(finalS, (char *)"Final Score: %d", score);
-        drawString(m_pgraphics, width / 2, height / 2 - Y_OFFSET, gameover, BRIGHT_RED_COLOR, 4);
-        drawString(m_pgraphics, width / 2, height/2 + Y_OFFSET, finalS, WHITE_COLOR, 3);
+        if (score == 5000)
+        {
+            drawString(m_pgraphics, width / 2, height / 2 - Y_OFFSET, youwin, BRIGHT_RED_COLOR, 4);
+        }
+        else
+        {
+            drawString(m_pgraphics, width / 2, height / 2 - Y_OFFSET, gameover, BRIGHT_RED_COLOR, 4);
+        }
+        drawString(m_pgraphics, width / 2, height / 2 + Y_OFFSET, finalS, WHITE_COLOR, 3);
+        drawString(m_pgraphics, width / 2, height / 2 + Y_OFFSET * 3, pressRes, WHITE_COLOR, 2);
         m_pgraphics->UpdateDisplay();
     }
-    collisons();
-    if (circleY > m_pgraphics->GetHeight())
+    if (circleY > (int)m_pgraphics->GetHeight())
     {
-        circleY = m_pgraphics->GetHeight()/2;
+        circleY = m_pgraphics->GetHeight() / 2;
         circleX = width / 2;
         lives -= 1;
+        boxPosition = width / 2;
     }
-    if (lives == 0) {
+    if (lives == 0)
+    {
         gameOver = true;
     }
 }
@@ -166,7 +207,14 @@ void CBreakOut::KeyPressedHandler(const char *pString)
     assert(s_pThis != 0);
     if (strlen(pString))
     {
-        s_pThis->boxDirection = s_pThis->boxDirection == 1 ? 0 : 1;
+        if (s_pThis->gameOver)
+        {
+            s_pThis->reset();
+        }
+        else
+        {
+            s_pThis->boxDirection = s_pThis->boxDirection == 1 ? 0 : 1;
+        }
     }
 }
 
@@ -187,7 +235,7 @@ void CBreakOut::Run(unsigned nCore)
     int width = (m_pgraphics->GetWidth() > MAX_WIDTH ? MAX_WIDTH : m_pgraphics->GetWidth()) - X_OFFSET * 2;
     int height = m_pgraphics->GetHeight();
     circleX = width / 2;
-    circleY = height - Y_OFFSET * 2;
+    circleY = height / 2;
     switch (nCore)
     {
     case 0: // first core handles drawing to the screen

@@ -48,6 +48,7 @@ private:
     void drawBlocks();
     void handleKeyboard();
     void collisons();
+    void reset();
 
 private:
     C2DGraphics *m_pgraphics;
