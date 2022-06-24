@@ -1,0 +1,5 @@
+*.o
+*.d
+kernel8.*
+circle/
+.vscode/
